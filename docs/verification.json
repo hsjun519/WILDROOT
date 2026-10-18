@@ -1,0 +1,29 @@
+{
+  "version": "3.9.1",
+  "sourceSHA256": "89290ec008f71735bfe27dbe887ad8714025dea7877929e1859834dae5bef855",
+  "recombinedSourceIdentical": true,
+  "assets": 42,
+  "preview": {
+    "path": "/WILDROOT/",
+    "assetsLoaded": 42,
+    "itemModels": 128,
+    "normalLaunch": true,
+    "keyboardMovementAttackDodge": true,
+    "fireballVolley": true,
+    "starterMask": "blade",
+    "errors": [],
+    "failed": []
+  },
+  "attackTiming": {
+    "scenarios": 96,
+    "checks": [
+      "Seven fast forms have longer animation and attack intervals; the other nine keep their timing",
+      "96 normal/haste and evolution scenarios sustain real held attack input, including charged attacks, without cutting the previous animation",
+      "Aren first swing lasts 0.24s instead of 0.16s, anticipation remains readable, contact stays synchronized, and dodge can still cancel",
+      "Aren S still launches five magical fireballs with its existing 17s cooldown"
+    ]
+  },
+  "limits": [
+    "Automated functional and loading checks; not a human 70-stage playthrough."
+  ]
+}

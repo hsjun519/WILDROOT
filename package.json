@@ -1,0 +1,13 @@
+{
+  "name": "wildroot",
+  "version": "3.9.1",
+  "private": true,
+  "description": "WILDROOT: 태양의 그늘",
+  "scripts": {
+    "start": "node scripts/serve.mjs",
+    "test": "node scripts/verify.mjs"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}
