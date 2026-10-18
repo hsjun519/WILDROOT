@@ -1,7 +1,17 @@
 {
   "version": "3.9.1",
   "sourceSHA256": "89290ec008f71735bfe27dbe887ad8714025dea7877929e1859834dae5bef855",
-  "recombinedSourceIdentical": true,
+  "originalExtractionRoundtripIdentical": true,
+  "webDelivery": {
+    "format": "webp",
+    "quality": 90,
+    "alphaQuality": 100,
+    "originalPNGsRetained": true,
+    "originalBytes": 112978877,
+    "deliveryBytes": 26764254,
+    "allAlphaExact": true,
+    "allDimensionsPreserved": true
+  },
   "assets": 42,
   "preview": {
     "path": "/WILDROOT/",
