@@ -2,6 +2,7 @@
 'use strict';
 (()=>{
 const $=id=>document.getElementById(id), canvas=$('game'), ctx=canvas.getContext('2d',{alpha:false});
+function retryWebImage(im){im.addEventListener('error',()=>{const url=im.src.split('?')[0],count=im.webRetries||0;if(!url.includes('/assets/web/')||count>=2)return;im.webRetries=count+1;setTimeout(()=>{im.src=url+'?retry='+im.webRetries;},350+count*650);});}
 const W=1280,H=720,FLOOR=610,STEP=1/120,TAU=Math.PI*2,SAVE_KEY='flatformer.wildroot.save.v1',SETTINGS_KEY='flatformer.wildroot.settings.v1';
 const clamp=(v,a,b)=>Math.max(a,Math.min(b,v)), lerp=(a,b,t)=>a+(b-a)*t, overlap=(a,b)=>a.x<b.x+b.w&&a.x+a.w>b.x&&a.y<b.y+b.h&&a.y+a.h>b.y;
 const dist=(a,b)=>Math.hypot(a.x-b.x,a.y-b.y), clone=v=>JSON.parse(JSON.stringify(v)), fmt=t=>`${Math.floor(t/60).toString().padStart(2,'0')}:${Math.floor(t%60).toString().padStart(2,'0')}`;
@@ -11,8 +12,8 @@ const titles=[['첫 번째 빛','바람의 징검다리','깨어난 정원','하
 let storageOK=true;
 function readJSON(key){try{const s=localStorage.getItem(key);return s?JSON.parse(s):null;}catch(e){storageOK=false;return null;}}
 function writeJSON(key,value){try{localStorage.setItem(key,JSON.stringify(value));return true;}catch(e){storageOK=false;$('storage-warning').classList.remove('hidden');return false;}}
-const forestImage=new Image();forestImage.fetchPriority='high';forestImage.src='./assets/web/fd1592a6aafb54d09043.webp';const forestCache=[],terrainCache=[];
-const spriteAtlas=new Image();spriteAtlas.fetchPriority='high';spriteAtlas.src='./assets/web/865a47823af04002575d.webp';let atlasFrames=null;
+const forestImage=new Image();retryWebImage(forestImage);forestImage.fetchPriority='high';forestImage.src='./assets/web/fd1592a6aafb54d09043.webp';const forestCache=[],terrainCache=[];
+const spriteAtlas=new Image();retryWebImage(spriteAtlas);spriteAtlas.fetchPriority='high';spriteAtlas.src='./assets/web/865a47823af04002575d.webp';let atlasFrames=null;
 
 const FORMS={
  blade:{name:'가시 검객',color:'#d2ffab',weapon:'sword',speed:.25,power:1,magic:'귀환 씨앗',s1:'가시 회전참',s2:'십자 칼바람',cd:[5.5,8],desc:'넓은 3연타 · 되돌아오는 씨앗 · 회전참과 관통 검기'},
@@ -40,11 +41,11 @@ const RELICS={
 };
 const WORLD_UPGRADES={vital:{name:'체력 용기',desc:'최대 체력 +12 · 즉시 체력 +12',max:4,color:'#efb299'},blade:{name:'무기 연마',desc:'기본 위력 +3 · 최대 3단계',max:3,color:'#e8d28c'},flow:{name:'대시 정비',desc:'대시 대기시간 −0.055초 · 최대 3단계',max:3,color:'#b9ddc0'}};
 const routeImages={},routeSceneCache=new Map(),routeLayers=[];
-routeImages.village=new Image();routeImages.village.fetchPriority='high';routeImages.village.src='./assets/web/6e238b94e7c0ccc86782.webp';
-routeImages.log=new Image();routeImages.log.fetchPriority='low';routeImages.log.src='./assets/web/5ffe5880996e5df2a921.webp';
-routeImages.boss0=new Image();routeImages.boss0.fetchPriority='low';routeImages.boss0.src='./assets/web/f28a2e8898aa7457a290.webp';
-routeImages.boss1=new Image();routeImages.boss1.fetchPriority='low';routeImages.boss1.src='./assets/web/19a81293cd7afc33d63f.webp';
-routeImages.boss2=new Image();routeImages.boss2.fetchPriority='low';routeImages.boss2.src='./assets/web/039b50bd57b14ff24f6a.webp';
+routeImages.village=new Image();retryWebImage(routeImages.village);routeImages.village.fetchPriority='high';routeImages.village.src='./assets/web/6e238b94e7c0ccc86782.webp';
+routeImages.log=new Image();retryWebImage(routeImages.log);routeImages.log.fetchPriority='low';routeImages.log.src='./assets/web/5ffe5880996e5df2a921.webp';
+routeImages.boss0=new Image();retryWebImage(routeImages.boss0);routeImages.boss0.fetchPriority='low';routeImages.boss0.src='./assets/web/f28a2e8898aa7457a290.webp';
+routeImages.boss1=new Image();retryWebImage(routeImages.boss1);routeImages.boss1.fetchPriority='low';routeImages.boss1.src='./assets/web/19a81293cd7afc33d63f.webp';
+routeImages.boss2=new Image();retryWebImage(routeImages.boss2);routeImages.boss2.fetchPriority='low';routeImages.boss2.src='./assets/web/039b50bd57b14ff24f6a.webp';
 
 const SECTOR_SPAN=1280;
 const ROOM_NAMES={hunt:'기동 섬멸전',horde:'다중 웨이브',seal:'결계 파괴',parkour:'공중 룬 수집',elite:'중간보스 협공전',survive:'포위 생존전',defense:'생명석 방어',gauntlet:'함정 돌파',boss:'수호자 결전'};
@@ -52,10 +53,10 @@ let zones=[],summons=[],telegraphs=[],relicTimers={},directHits=0,magicCasts=0;
 const tintCache=new Map();
 let combatUIBuilt=false;
 
-const formAtlas=new Image();formAtlas.fetchPriority='low';formAtlas.src='./assets/web/a395f11ed6e819ca2baa.webp';let formFrames=null;
+const formAtlas=new Image();retryWebImage(formAtlas);formAtlas.fetchPriority='low';formAtlas.src='./assets/web/a395f11ed6e819ca2baa.webp';let formFrames=null;
 const rawSettings=readJSON(SETTINGS_KEY)||{};
 const settings={sound:rawSettings.sound!==false,volume:clamp(Number.isFinite(rawSettings.volume)?rawSettings.volume:.35,0,1),shake:rawSettings.shake!==false,reduced:rawSettings.reduced??matchMedia('(prefers-reduced-motion: reduce)').matches,difficulty:['story','normal','veteran'].includes(rawSettings.difficulty)?rawSettings.difficulty:'normal'};
-const colossalImage=new Image();colossalImage.fetchPriority='low';colossalImage.src='./assets/web/61f46aae6d925e5cf171.webp';const colossalFrames=[];
+const colossalImage=new Image();retryWebImage(colossalImage);colossalImage.fetchPriority='low';colossalImage.src='./assets/web/61f46aae6d925e5cf171.webp';const colossalFrames=[];
 const LEGACY_ITEMS={
  roadblade:{name:'여행자의 칼날',slot:'weapon',rarity:0,price:95,power:3,desc:'기본 위력 +3. 모든 가면의 무기에 깃드는 단순한 칼날.'},
  windblade:{name:'바람벼림 검',slot:'weapon',rarity:1,price:210,power:5,proc:'wind',desc:'위력 +5. 직접 공격 4회마다 관통 칼바람을 발사한다.'},
@@ -87,7 +88,7 @@ const LEGACY_ITEMS={
  worldseed:{name:'세계씨앗 반지',slot:'ring',rarity:3,price:820,hp:22,energy:1,proc:'seed',desc:'최대 체력 +22. 초당 에너지 +1. 보스·중간보스 처치 시 체력 20 회복.'}
 };
 const RARITY=[['일반','#d1d0ad'],['희귀','#a6c2ed'],['영웅','#d2afe6'],['전설','#efd089']],SLOT_NAMES={weapon:'무기',armor:'갑옷',ring1:'반지 I',ring2:'반지 II',aux1:'보조 I',aux2:'보조 II',aux3:'보조 III'};
-const sagaImage=new Image(),sagaFrames=[];sagaImage.fetchPriority='high';sagaImage.src='./assets/web/6cc9b9ed7f2b1435051a.webp';routeImages.capital=new Image();routeImages.capital.fetchPriority='low';routeImages.capital.src='./assets/web/c42585f7f20e7a2cc041.webp';
+const sagaImage=new Image(),sagaFrames=[];retryWebImage(sagaImage);sagaImage.fetchPriority='high';sagaImage.src='./assets/web/6cc9b9ed7f2b1435051a.webp';routeImages.capital=new Image();retryWebImage(routeImages.capital);routeImages.capital.fetchPriority='low';routeImages.capital.src='./assets/web/c42585f7f20e7a2cc041.webp';
 const TOTAL_STAGES=70,SHOP_STAGES=[4,9,14,19,24,29,34,39,44,49,54,59,64,68];
 const ACT_NAMES=['태양을 향한 두 사람','숲이 기억하는 전쟁','달그늘의 빈자리','지워진 이름들','해방의 대가','꺼진 별의 유산','왕관과 마지막 씨앗'];
 // Each row is authored separately. Routes describe places, not interchangeable arenas.
@@ -270,41 +271,41 @@ const EVOLUTIONS={
 };
 let ledgerTab='bag',merchantCategory=null;
 function preSagaJourneyStageTitle(stage){return({4:'숲길의 길손 쉼터',9:'신전 앞의 순례 시장',14:'달빛 아래의 상단',19:'거울문 앞의 쉼터',24:'뿌리 아래 상단',29:'심장 앞 마지막 시장'})[stage]||storyRoute(stage,1).name;}
-const dialogueImage=new Image();dialogueImage.fetchPriority='high';dialogueImage.src='./assets/web/15571e8eb835b3ebac9e.webp';
-const legacyHeroImage=new Image();legacyHeroImage.fetchPriority='low';legacyHeroImage.src='./assets/web/ba02df7d1c41ba843540.webp';
-const heavyMotionImage=new Image();heavyMotionImage.fetchPriority='low';heavyMotionImage.src='./assets/web/09f22bb07821fcf55f0a.webp';
-const meteorImage=new Image();meteorImage.fetchPriority='low';meteorImage.src='./assets/web/fe5a7dd0c9fc9aa619c6.webp';
+const dialogueImage=new Image();retryWebImage(dialogueImage);dialogueImage.fetchPriority='high';dialogueImage.src='./assets/web/15571e8eb835b3ebac9e.webp';
+const legacyHeroImage=new Image();retryWebImage(legacyHeroImage);legacyHeroImage.fetchPriority='low';legacyHeroImage.src='./assets/web/ba02df7d1c41ba843540.webp';
+const heavyMotionImage=new Image();retryWebImage(heavyMotionImage);heavyMotionImage.fetchPriority='low';heavyMotionImage.src='./assets/web/09f22bb07821fcf55f0a.webp';
+const meteorImage=new Image();retryWebImage(meteorImage);meteorImage.fetchPriority='low';meteorImage.src='./assets/web/fe5a7dd0c9fc9aa619c6.webp';
 const fxImages={};
-fxImages.wild=new Image();fxImages.wild.fetchPriority='low';fxImages.wild.src='./assets/web/93bbbb2b3bd665ac851d.webp';
-fxImages.veteran=new Image();fxImages.veteran.fetchPriority='low';fxImages.veteran.src='./assets/web/b44d5e5040105dd49994.webp';
-fxImages.legacies=new Image();fxImages.legacies.fetchPriority='low';fxImages.legacies.src='./assets/web/8e8770c572d7dccf4db6.webp';
-fxImages.strange=new Image();fxImages.strange.fetchPriority='low';fxImages.strange.src='./assets/web/c7dc99369811e01cfb1d.webp';
-fxImages.items=new Image();fxImages.items.fetchPriority='low';fxImages.items.src='./assets/web/7364702022ce86d541c1.webp';
+fxImages.wild=new Image();retryWebImage(fxImages.wild);fxImages.wild.fetchPriority='low';fxImages.wild.src='./assets/web/93bbbb2b3bd665ac851d.webp';
+fxImages.veteran=new Image();retryWebImage(fxImages.veteran);fxImages.veteran.fetchPriority='low';fxImages.veteran.src='./assets/web/b44d5e5040105dd49994.webp';
+fxImages.legacies=new Image();retryWebImage(fxImages.legacies);fxImages.legacies.fetchPriority='low';fxImages.legacies.src='./assets/web/8e8770c572d7dccf4db6.webp';
+fxImages.strange=new Image();retryWebImage(fxImages.strange);fxImages.strange.fetchPriority='low';fxImages.strange.src='./assets/web/c7dc99369811e01cfb1d.webp';
+fxImages.items=new Image();retryWebImage(fxImages.items);fxImages.items.fetchPriority='low';fxImages.items.src='./assets/web/7364702022ce86d541c1.webp';
 const itemArtImages={};
-itemArtImages.weapons=new Image();itemArtImages.weapons.fetchPriority='low';itemArtImages.weapons.src='./assets/web/14223d3aac00ccfc9ba6.webp';
-itemArtImages.armors=new Image();itemArtImages.armors.fetchPriority='low';itemArtImages.armors.src='./assets/web/3f7517f8865fa74baffe.webp';
-itemArtImages.rings=new Image();itemArtImages.rings.fetchPriority='low';itemArtImages.rings.src='./assets/web/054fb653b3d31d31024b.webp';
-itemArtImages.accessories=new Image();itemArtImages.accessories.fetchPriority='low';itemArtImages.accessories.src='./assets/web/f83650c98ab1d904a320.webp';
-itemArtImages.legacies=new Image();itemArtImages.legacies.fetchPriority='low';itemArtImages.legacies.src='./assets/web/ec74519eda65783bf08c.webp';
-itemArtImages.journey=new Image();itemArtImages.journey.fetchPriority='high';itemArtImages.journey.src='./assets/web/281cbb2708ac6767d9ae.webp';
+itemArtImages.weapons=new Image();retryWebImage(itemArtImages.weapons);itemArtImages.weapons.fetchPriority='low';itemArtImages.weapons.src='./assets/web/14223d3aac00ccfc9ba6.webp';
+itemArtImages.armors=new Image();retryWebImage(itemArtImages.armors);itemArtImages.armors.fetchPriority='low';itemArtImages.armors.src='./assets/web/3f7517f8865fa74baffe.webp';
+itemArtImages.rings=new Image();retryWebImage(itemArtImages.rings);itemArtImages.rings.fetchPriority='low';itemArtImages.rings.src='./assets/web/054fb653b3d31d31024b.webp';
+itemArtImages.accessories=new Image();retryWebImage(itemArtImages.accessories);itemArtImages.accessories.fetchPriority='low';itemArtImages.accessories.src='./assets/web/f83650c98ab1d904a320.webp';
+itemArtImages.legacies=new Image();retryWebImage(itemArtImages.legacies);itemArtImages.legacies.fetchPriority='low';itemArtImages.legacies.src='./assets/web/ec74519eda65783bf08c.webp';
+itemArtImages.journey=new Image();retryWebImage(itemArtImages.journey);itemArtImages.journey.fetchPriority='high';itemArtImages.journey.src='./assets/web/281cbb2708ac6767d9ae.webp';
 const ITEM_ART_MAP={"roadblade":{"pack":"weapons","index":0,"cols":6,"rows":4},"windblade":{"pack":"weapons","index":1,"cols":6,"rows":4},"coalstaff":{"pack":"weapons","index":2,"cols":6,"rows":4},"icepike":{"pack":"weapons","index":3,"cols":6,"rows":4},"stormstring":{"pack":"weapons","index":4,"cols":6,"rows":4},"moonedge":{"pack":"weapons","index":5,"cols":6,"rows":4},"stonehammer":{"pack":"weapons","index":6,"cols":6,"rows":4},"gardenfang":{"pack":"weapons","index":7,"cols":6,"rows":4},"glassreaper":{"pack":"weapons","index":8,"cols":6,"rows":4},"heartforge":{"pack":"weapons","index":9,"cols":6,"rows":4},"dawnSword":{"pack":"weapons","index":10,"cols":6,"rows":4},"blackMoon":{"pack":"weapons","index":11,"cols":6,"rows":4},"frostRapier":{"pack":"weapons","index":12,"cols":6,"rows":4},"abandonedGuard":{"pack":"weapons","index":13,"cols":6,"rows":4},"tempestLance":{"pack":"weapons","index":14,"cols":6,"rows":4},"riftFang":{"pack":"weapons","index":15,"cols":6,"rows":4},"eternalDawn":{"pack":"weapons","index":16,"cols":6,"rows":4},"food:soup":{"pack":"weapons","index":17,"cols":6,"rows":4},"food:meal":{"pack":"weapons","index":18,"cols":6,"rows":4},"food:elixir":{"pack":"weapons","index":19,"cols":6,"rows":4},"utility:anvil":{"pack":"weapons","index":20,"cols":6,"rows":4},"utility:coins":{"pack":"weapons","index":21,"cols":6,"rows":4},"utility:xp":{"pack":"weapons","index":22,"cols":6,"rows":4},"utility:evolution":{"pack":"weapons","index":23,"cols":6,"rows":4},"linen":{"pack":"armors","index":0,"cols":6,"rows":4},"barkmail":{"pack":"armors","index":1,"cols":6,"rows":4},"rangercoat":{"pack":"armors","index":2,"cols":6,"rows":4},"mossplate":{"pack":"armors","index":3,"cols":6,"rows":4},"moonrobe":{"pack":"armors","index":4,"cols":6,"rows":4},"royalbark":{"pack":"armors","index":5,"cols":6,"rows":4},"mirrorveil":{"pack":"armors","index":6,"cols":6,"rows":4},"heartplate":{"pack":"armors","index":7,"cols":6,"rows":4},"solarArmor":{"pack":"armors","index":8,"cols":6,"rows":4},"shadowCloak":{"pack":"armors","index":9,"cols":6,"rows":4},"thornArmor":{"pack":"armors","index":10,"cols":6,"rows":4},"warHero":{"pack":"armors","index":11,"cols":6,"rows":4},"crystalArmor":{"pack":"armors","index":12,"cols":6,"rows":4},"berserkerPlate":{"pack":"armors","index":13,"cols":6,"rows":4},"mask:aren":{"pack":"armors","index":14,"cols":6,"rows":4},"mask:blade":{"pack":"armors","index":15,"cols":6,"rows":4},"mask:ember":{"pack":"armors","index":16,"cols":6,"rows":4},"mask:frost":{"pack":"armors","index":17,"cols":6,"rows":4},"mask:storm":{"pack":"armors","index":18,"cols":6,"rows":4},"mask:reaper":{"pack":"armors","index":19,"cols":6,"rows":4},"mask:warden":{"pack":"armors","index":20,"cols":6,"rows":4},"mask:nox":{"pack":"armors","index":21,"cols":6,"rows":4},"utility:chestClosed":{"pack":"armors","index":22,"cols":6,"rows":4},"utility:chestOpen":{"pack":"armors","index":23,"cols":6,"rows":4},"copperring":{"pack":"rings","index":0,"cols":6,"rows":4},"quickring":{"pack":"rings","index":1,"cols":6,"rows":4},"amberring":{"pack":"rings","index":2,"cols":6,"rows":4},"spiritring":{"pack":"rings","index":3,"cols":6,"rows":4},"sparkring":{"pack":"rings","index":4,"cols":6,"rows":4},"scholarseal":{"pack":"rings","index":5,"cols":6,"rows":4},"leechring":{"pack":"rings","index":6,"cols":6,"rows":4},"echojewel":{"pack":"rings","index":7,"cols":6,"rows":4},"moonseal":{"pack":"rings","index":8,"cols":6,"rows":4},"worldseed":{"pack":"rings","index":9,"cols":6,"rows":4},"emberBand":{"pack":"rings","index":10,"cols":6,"rows":4},"nightPact":{"pack":"rings","index":11,"cols":6,"rows":4},"cycleRing":{"pack":"rings","index":12,"cols":6,"rows":4},"timeRing":{"pack":"rings","index":13,"cols":6,"rows":4},"pursuitRing":{"pack":"rings","index":14,"cols":6,"rows":4},"bastionRing":{"pack":"rings","index":15,"cols":6,"rows":4},"manaCycle":{"pack":"rings","index":16,"cols":6,"rows":4},"stormRing":{"pack":"rings","index":17,"cols":6,"rows":4},"executionRing":{"pack":"rings","index":18,"cols":6,"rows":4},"moonlightRing":{"pack":"rings","index":19,"cols":6,"rows":4},"utility:heal":{"pack":"rings","index":20,"cols":6,"rows":4},"utility:energy":{"pack":"rings","index":21,"cols":6,"rows":4},"utility:notebook":{"pack":"rings","index":22,"cols":6,"rows":4},"utility:scabbard":{"pack":"rings","index":23,"cols":6,"rows":4},"immortalCharm":{"pack":"accessories","index":0,"cols":6,"rows":4},"thornVine":{"pack":"accessories","index":1,"cols":6,"rows":4},"warDrum":{"pack":"accessories","index":2,"cols":6,"rows":4},"moonShard":{"pack":"accessories","index":3,"cols":6,"rows":4},"ghostSteps":{"pack":"accessories","index":4,"cols":6,"rows":4},"ancientHourglass":{"pack":"accessories","index":5,"cols":6,"rows":4},"hunterEye":{"pack":"accessories","index":6,"cols":6,"rows":4},"looterBag":{"pack":"accessories","index":7,"cols":6,"rows":4},"riftCompass":{"pack":"accessories","index":8,"cols":6,"rows":4},"guardianInsignia":{"pack":"accessories","index":9,"cols":6,"rows":4},"healingSeed":{"pack":"accessories","index":10,"cols":6,"rows":4},"counterSeal":{"pack":"accessories","index":11,"cols":6,"rows":4},"inscription:conductor":{"pack":"accessories","index":12,"cols":6,"rows":4},"inscription:echo":{"pack":"accessories","index":13,"cols":6,"rows":4},"inscription:froststep":{"pack":"accessories","index":14,"cols":6,"rows":4},"inscription:shatter":{"pack":"accessories","index":15,"cols":6,"rows":4},"inscription:contagion":{"pack":"accessories","index":16,"cols":6,"rows":4},"inscription:mirror":{"pack":"accessories","index":17,"cols":6,"rows":4},"inscription:harvest":{"pack":"accessories","index":18,"cols":6,"rows":4},"inscription:aerial":{"pack":"accessories","index":19,"cols":6,"rows":4},"inscription:gravity":{"pack":"accessories","index":20,"cols":6,"rows":4},"inscription:counter":{"pack":"accessories","index":21,"cols":6,"rows":4},"inscription:ricochet":{"pack":"accessories","index":22,"cols":6,"rows":4},"inscription:volatile":{"pack":"accessories","index":23,"cols":6,"rows":4},"mask:beast":{"pack":"legacies","index":0,"cols":4,"rows":4},"mask:rider":{"pack":"legacies","index":1,"cols":4,"rows":4},"mask:necro":{"pack":"legacies","index":2,"cols":4,"rows":4},"mask:chrono":{"pack":"legacies","index":3,"cols":4,"rows":4},"mask:puppet":{"pack":"legacies","index":4,"cols":4,"rows":4},"mask:engineer":{"pack":"legacies","index":5,"cols":4,"rows":4},"mask:tide":{"pack":"legacies","index":6,"cols":4,"rows":4},"mask:mirror":{"pack":"legacies","index":7,"cols":4,"rows":4},"ally:wolf":{"pack":"legacies","index":8,"cols":4,"rows":4},"ally:wisp":{"pack":"legacies","index":9,"cols":4,"rows":4},"ally:bone":{"pack":"legacies","index":10,"cols":4,"rows":4},"ally:bow":{"pack":"legacies","index":11,"cols":4,"rows":4},"ally:drone":{"pack":"legacies","index":12,"cols":4,"rows":4},"ally:puppet":{"pack":"legacies","index":13,"cols":4,"rows":4},"ally:dragon":{"pack":"legacies","index":14,"cols":4,"rows":4},"ally:owl":{"pack":"legacies","index":15,"cols":4,"rows":4},"journey:chestCommon":{"pack":"journey","index":0,"cols":4,"rows":4},"journey:chestRare":{"pack":"journey","index":1,"cols":4,"rows":4},"journey:chestHero":{"pack":"journey","index":2,"cols":4,"rows":4},"journey:gems":{"pack":"journey","index":3,"cols":4,"rows":4},"journey:villager":{"pack":"journey","index":4,"cols":4,"rows":4},"journey:scout":{"pack":"journey","index":5,"cols":4,"rows":4},"journey:artisan":{"pack":"journey","index":6,"cols":4,"rows":4},"journey:checkpoint":{"pack":"journey","index":7,"cols":4,"rows":4},"travelBell":{"pack":"journey","index":8,"cols":4,"rows":4},"fieldKit":{"pack":"journey","index":9,"cols":4,"rows":4},"oldLens":{"pack":"journey","index":10,"cols":4,"rows":4},"brassToken":{"pack":"journey","index":11,"cols":4,"rows":4},"journey:chestCommonOpen":{"pack":"journey","index":12,"cols":4,"rows":4},"journey:chestRareOpen":{"pack":"journey","index":13,"cols":4,"rows":4},"journey:chestHeroOpen":{"pack":"journey","index":14,"cols":4,"rows":4},"journey:knight":{"pack":"journey","index":15,"cols":4,"rows":4}};
-const marketVendorImage=new Image();marketVendorImage.fetchPriority='low';marketVendorImage.src='./assets/web/e72a07fa7839b290031b.webp';
+const marketVendorImage=new Image();retryWebImage(marketVendorImage);marketVendorImage.fetchPriority='low';marketVendorImage.src='./assets/web/e72a07fa7839b290031b.webp';
 const naturalImages={};
-naturalImages.basics=new Image();naturalImages.basics.fetchPriority='low';naturalImages.basics.src='./assets/web/204e9b9c0589ff0cc4be.webp';
-naturalImages.reveal=new Image();naturalImages.reveal.fetchPriority='low';naturalImages.reveal.src='./assets/web/86fec21b6e2eeaf5903c.webp';
-naturalImages.steel=new Image();naturalImages.steel.fetchPriority='low';naturalImages.steel.src='./assets/web/006bfcbaa65a9256d635.webp';
-naturalImages.shadow=new Image();naturalImages.shadow.fetchPriority='low';naturalImages.shadow.src='./assets/web/3ef8fae2cc17cb296616.webp';
-naturalImages.craft=new Image();naturalImages.craft.fetchPriority='low';naturalImages.craft.src='./assets/web/4bd749dbfa1b0b3b2abc.webp';
-naturalImages.arcane=new Image();naturalImages.arcane.fetchPriority='low';naturalImages.arcane.src='./assets/web/6fe2e454dcb68a739dcc.webp';
-const chronicleImage=new Image();chronicleImage.fetchPriority='low';chronicleImage.src='./assets/web/b079980c0dbc5dfa7eb2.webp';
-const undergroundImage=new Image();undergroundImage.fetchPriority='low';undergroundImage.src='./assets/web/932c0a524d765c0d41cf.webp';
-const travelNPCImage=new Image();travelNPCImage.fetchPriority='low';travelNPCImage.src='./assets/web/3c4a62d3da0f0badf40c.webp';
-const puzzleImage=new Image();puzzleImage.fetchPriority='low';puzzleImage.src='./assets/web/3fdc8646dd5026d8e8cd.webp';
-const environmentImage=new Image();environmentImage.fetchPriority='low';environmentImage.src='./assets/web/3830ebd69c048509fb4a.webp';
-const rosterImage=new Image();rosterImage.fetchPriority='high';rosterImage.src='./assets/web/368c628f38622b4a422d.webp';
-const bossImpactImage=new Image();bossImpactImage.fetchPriority='low';bossImpactImage.src='./assets/web/d4fc832112cc0d6a311a.webp';
-const arenMotionImage=new Image();arenMotionImage.fetchPriority='high';arenMotionImage.src='./assets/web/79cba7d83a6e6e745320.webp';
-const motionFXImage=new Image();motionFXImage.fetchPriority='high';motionFXImage.src='./assets/web/9ea322681a8102c10653.webp';
+naturalImages.basics=new Image();retryWebImage(naturalImages.basics);naturalImages.basics.fetchPriority='low';naturalImages.basics.src='./assets/web/204e9b9c0589ff0cc4be.webp';
+naturalImages.reveal=new Image();retryWebImage(naturalImages.reveal);naturalImages.reveal.fetchPriority='low';naturalImages.reveal.src='./assets/web/86fec21b6e2eeaf5903c.webp';
+naturalImages.steel=new Image();retryWebImage(naturalImages.steel);naturalImages.steel.fetchPriority='low';naturalImages.steel.src='./assets/web/006bfcbaa65a9256d635.webp';
+naturalImages.shadow=new Image();retryWebImage(naturalImages.shadow);naturalImages.shadow.fetchPriority='low';naturalImages.shadow.src='./assets/web/3ef8fae2cc17cb296616.webp';
+naturalImages.craft=new Image();retryWebImage(naturalImages.craft);naturalImages.craft.fetchPriority='low';naturalImages.craft.src='./assets/web/4bd749dbfa1b0b3b2abc.webp';
+naturalImages.arcane=new Image();retryWebImage(naturalImages.arcane);naturalImages.arcane.fetchPriority='low';naturalImages.arcane.src='./assets/web/6fe2e454dcb68a739dcc.webp';
+const chronicleImage=new Image();retryWebImage(chronicleImage);chronicleImage.fetchPriority='low';chronicleImage.src='./assets/web/b079980c0dbc5dfa7eb2.webp';
+const undergroundImage=new Image();retryWebImage(undergroundImage);undergroundImage.fetchPriority='low';undergroundImage.src='./assets/web/932c0a524d765c0d41cf.webp';
+const travelNPCImage=new Image();retryWebImage(travelNPCImage);travelNPCImage.fetchPriority='low';travelNPCImage.src='./assets/web/3c4a62d3da0f0badf40c.webp';
+const puzzleImage=new Image();retryWebImage(puzzleImage);puzzleImage.fetchPriority='low';puzzleImage.src='./assets/web/3fdc8646dd5026d8e8cd.webp';
+const environmentImage=new Image();retryWebImage(environmentImage);environmentImage.fetchPriority='low';environmentImage.src='./assets/web/3830ebd69c048509fb4a.webp';
+const rosterImage=new Image();retryWebImage(rosterImage);rosterImage.fetchPriority='high';rosterImage.src='./assets/web/368c628f38622b4a422d.webp';
+const bossImpactImage=new Image();retryWebImage(bossImpactImage);bossImpactImage.fetchPriority='low';bossImpactImage.src='./assets/web/d4fc832112cc0d6a311a.webp';
+const arenMotionImage=new Image();retryWebImage(arenMotionImage);arenMotionImage.fetchPriority='high';arenMotionImage.src='./assets/web/79cba7d83a6e6e745320.webp';
+const motionFXImage=new Image();retryWebImage(motionFXImage);motionFXImage.fetchPriority='high';motionFXImage.src='./assets/web/9ea322681a8102c10653.webp';
 Object.assign(FORMS,{aren:{...clone(FORMS.blade),name:'아렌',color:'#e6c998',hp:100,trait:'첫 번째 약속',passive:'빠른 검술과 대시. 유물은 힘만이 아니라 다른 사람의 역사를 남긴다.'},nox:{...clone(FORMS.blade),name:'어둠의 기사',color:'#a5ced7',hp:124,move:300,taken:.94,period:[.25,.27,.32,.48],duration:[.2,.23,.28,.38],ranges:[95,105,120,155],multipliers:[.9,1,1.2,2.1],cd:[7,11],trait:'남겨진 방패',passive:'패링과 강타로 수호의 별을 쌓는다. 별 3개에서 다음 스킬이 보호막과 방어 관통을 더한다.',magic:'꺼진 별의 파동',s1:'그늘의 수호참',s2:'별을 위한 장막'}});
 EVOLUTIONS.aren={...EVOLUTIONS.blade,name:'방랑기사 아렌'};EVOLUTIONS.nox={name:'별을 남기는 기사',basic:'마무리가 양방향 보호 검기를 추가한다.',magic:'별의 파동이 귀환하여 뒤쪽까지 지킨다.',s1:'수호참 뒤 세 번의 지연 참격.',s2:'장막이 보호막과 주위 반격 지진을 생성한다.',ultimate:'별의 결계 뒤 사방으로 수호 검기를 발사한다.',trait:'별을 소비한 스킬이 짧은 수호막을 남긴다.'};
 let storyView=null,voiceTime=0,sessionSeen=new Set(),bagFilter='all',bagSort='rarity',storyFrameCache=[];
